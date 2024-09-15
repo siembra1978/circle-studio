@@ -1,3 +1,4 @@
+import pygame
 import replaydecoder
 
 selectedReplay = 'stdold.osr'
