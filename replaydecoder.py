@@ -68,11 +68,11 @@ mods = {
 def whatMods(modId):
     result = ''
     for key in mods.keys():
-        print(key, modId)
+        #print(key, modId)
         if modId >= int(key) and modId > 0:
             modId = modId - int(key)
             result = result + mods.get(key)
-            print(result)
+            #print(result)
         #time.sleep(.25)
     return result
 
