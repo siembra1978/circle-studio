@@ -1,4 +1,11 @@
 import replaydecoder
 
-replayInfo = replaydecoder.readReplay(input("Enter file name: "))
+selectedReplay = 'stdold.osr'
 
+replayInfo = replaydecoder.readReplay(selectedReplay)
+
+for detail in replayInfo:
+    if detail != "replay":
+        print(detail, ":", replayInfo.get(detail))
+
+#print(replayInfo.get("replay"))
