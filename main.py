@@ -1,12 +1,15 @@
 import pygame
+import struct
+import lzma
 import replaydecoder
+
+printInfo = False
+
+decompressor = lzma.LZMADecompressor()
 
 selectedReplay = 'stdold.osr'
 
-replayInfo = replaydecoder.readReplay(selectedReplay)
+stuff = replaydecoder.initiateReplayAnalysis(selectedReplay)
 
-for detail in replayInfo:
-    if detail != "replay":
-        print(detail, ":", replayInfo.get(detail))
-
-#print(replayInfo.get("replay"))
+#print(stuff)
+print(type(stuff))

@@ -68,11 +68,11 @@ mods = {
 def whatMods(modId):
     result = ''
     for key in mods.keys():
-        print(key, modId)
+        #print(key, modId)
         if modId >= int(key) and modId > 0:
             modId = modId - int(key)
             result = result + mods.get(key)
-            print(result)
+            #print(result)
         #time.sleep(.25)
     return result
 
@@ -119,5 +119,36 @@ def readReplay(replayName):
     offset += replayInfo.get("length")
     replayInfo["id"] = struct.unpack_from("<Q", replayData, offset)[0]
     offset += 8
-
+    
     return replayInfo
+
+def translateReplayData(replayData):
+    print("h")
+
+
+
+def initiateReplayAnalysis(replayName):
+    replay = readReplay(replayName)
+    compressedReplayData = replay["replay"]
+    replayData = decoders.decodeLZMA(compressedReplayData)
+
+    return replayData
+
+selectedReplay = 'std.osr'
+
+stuff = initiateReplayAnalysis(selectedReplay)
+
+dataList = []
+cursor1 = 0
+tempBit = ''
+
+for index, char in enumerate(stuff):
+    if char == ',' and cursor1 == 0:
+        dataList.append(tempBit)
+        tempBit = ''
+        cursor1 = index
+    elif char != ',' and index >= cursor1:
+        cursor1 = 0
+        tempBit = tempBit + char
+
+print(dataList)
