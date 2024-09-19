@@ -65,15 +65,28 @@ mods = {
     "0": "NM"
 }
 
+inputs = {
+    "1":"M1",
+    "2":"M2",
+    "4":"K1",
+    "8":"K2",
+    "16":"Smoke"
+}
+
 def whatMods(modId):
     result = ''
     for key in mods.keys():
-        #print(key, modId)
         if modId >= int(key) and modId > 0:
             modId = modId - int(key)
             result = result + mods.get(key)
-            #print(result)
-        #time.sleep(.25)
+    return result
+
+def whatInputs(inputId):
+    result = ''
+    for key in inputs.keys():
+        if inputId >= int(key) and inputId > 0:
+            inputId = inputId - int(key)
+            result = result + inputs.get(key)
     return result
 
 def readReplay(replayName):
@@ -122,8 +135,41 @@ def readReplay(replayName):
     
     return replayInfo
 
-def translateReplayData(replayData):
-    print("h")
+def extractFrames(replayData):
+    dataList = []
+    frameList = []
+    cursor1 = 0
+    cursor2 = 0
+    tempList = []
+    tempBit = ''
+    tempBit2 = ''
+
+    for index, char in enumerate(replayData):
+        if char == ',' and cursor1 == 0:
+            tempBit =  tempBit + '|'
+            dataList.append(tempBit)
+            tempBit = ''
+            cursor1 = index
+        elif char != ',' and index >= cursor1:
+            cursor1 = 0
+            tempBit = tempBit + char
+
+    for item in dataList:
+        #time.sleep(1)
+        cursor2 = 0
+        tempBit2 = ''
+        tempList = []
+        for i, char in enumerate(item):
+            if char == '|' and cursor2 == 0:
+                tempList.append(tempBit2)
+                tempBit2 = ''
+                cursor2 = index
+            elif char != '|' and index >= cursor2:
+                cursor2 = 0
+                tempBit2 = tempBit2 + char
+        frameList.append(tuple(tempList))
+
+    return frameList
 
 
 
@@ -131,24 +177,6 @@ def initiateReplayAnalysis(replayName):
     replay = readReplay(replayName)
     compressedReplayData = replay["replay"]
     replayData = decoders.decodeLZMA(compressedReplayData)
+    frames = extractFrames(replayData)
 
-    return replayData
-
-selectedReplay = 'std.osr'
-
-stuff = initiateReplayAnalysis(selectedReplay)
-
-dataList = []
-cursor1 = 0
-tempBit = ''
-
-for index, char in enumerate(stuff):
-    if char == ',' and cursor1 == 0:
-        dataList.append(tempBit)
-        tempBit = ''
-        cursor1 = index
-    elif char != ',' and index >= cursor1:
-        cursor1 = 0
-        tempBit = tempBit + char
-
-print(dataList)
+    return frames

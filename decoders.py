@@ -15,6 +15,7 @@ def decodeULEB(data, off):
             break
         shift += 7
     return result, size
+
 def readString(data, off):
     marker, = struct.unpack_from("<B", data, off)
     off += 1
