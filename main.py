@@ -49,4 +49,4 @@ for index, frame in enumerate(frames):
 
     pygame.display.update()
     time.sleep(abs(int(frame[0])/1000))
-    clock.tick()
+    #clock.tick()
