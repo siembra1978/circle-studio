@@ -6,7 +6,7 @@ import replaydecoder
 
 printInfo = False
 
-selectedReplay = 'paula.osr'
+selectedReplay = 'stdplus.osr'
 
 frames = replaydecoder.initiateReplayAnalysis(selectedReplay)
 
