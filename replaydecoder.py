@@ -144,6 +144,7 @@ def extractFrames(replayData):
     tempBit = ''
     tempBit2 = ''
 
+    '''
     for index, char in enumerate(replayData):
         if char == ',' and cursor1 == 0:
             tempBit =  tempBit + '|'
@@ -168,6 +169,14 @@ def extractFrames(replayData):
                 cursor2 = 0
                 tempBit2 = tempBit2 + char
         frameList.append(tuple(tempList))
+    '''
+
+    dataList = replayData.split(",")
+
+    for item in dataList:
+        frameList.append(tuple(item.split("|")))
+
+    frameList = frameList[3:]
 
     return frameList
 
