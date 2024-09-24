@@ -29,6 +29,17 @@ replayInfo = {
     "mod+": ""
 }
 
+beatmapInfo = {
+    "title":"",
+    "artist":"",
+    "creator":"",
+    "diff":"",
+    "cs":"",
+    "od":"",
+    "ar":"",
+    "hitobjects":"",
+}
+
 mods = {
     "1073741824": "MR",
     "536870912": "SV2",
@@ -135,6 +146,44 @@ def readReplay(replayName):
     
     return replayInfo
 
+def readBeatmap(beatmapName):
+
+    beatmap = open(beatmapName, "r")
+
+    hitObjects = []
+    separatorIndex = None
+
+    for index, line in enumerate(beatmap):
+
+        line = line.strip()
+
+        if "Title:" in line:
+            beatmapInfo["title"] = line.split(":")[1]
+        if "Artist:" in line:
+            beatmapInfo["artist"] = line.split(":")[1]
+        if "Creator:" in line:
+            beatmapInfo["creator"] = line.split(":")[1]
+        if "Version:" in line:
+            beatmapInfo["diff"] = line.split(":")[1]
+        if "CircleSize:" in line:
+            beatmapInfo["cs"] = line.split(":")[1]
+        if "OverallDifficulty:" in line:
+            beatmapInfo["od"] = line.split(":")[1]
+        if "ApproachRate:" in line:
+            beatmapInfo["ar"] = line.split(":")[1]
+
+        if "[HitObjects]" in line:
+            separatorIndex = index
+        
+        if separatorIndex is not None:
+            if index > separatorIndex:
+                hitObjects.append(line)
+
+    beatmapInfo["hitobjects"] = hitObjects
+
+    return beatmapInfo
+
+
 def extractFrames(replayData):
     dataList = []
     frameList = []
@@ -143,33 +192,6 @@ def extractFrames(replayData):
     tempList = []
     tempBit = ''
     tempBit2 = ''
-
-    '''
-    for index, char in enumerate(replayData):
-        if char == ',' and cursor1 == 0:
-            tempBit =  tempBit + '|'
-            dataList.append(tempBit)
-            tempBit = ''
-            cursor1 = index
-        elif char != ',' and index >= cursor1:
-            cursor1 = 0
-            tempBit = tempBit + char
-
-    for item in dataList:
-        #time.sleep(1)
-        cursor2 = 0
-        tempBit2 = ''
-        tempList = []
-        for i, char in enumerate(item):
-            if char == '|' and cursor2 == 0:
-                tempList.append(tempBit2)
-                tempBit2 = ''
-                cursor2 = index
-            elif char != '|' and index >= cursor2:
-                cursor2 = 0
-                tempBit2 = tempBit2 + char
-        frameList.append(tuple(tempList))
-    '''
 
     dataList = replayData.split(",")
 
@@ -180,7 +202,13 @@ def extractFrames(replayData):
 
     return frameList
 
+def extractHitObjects(hitObjects):
+    parsedHitObjects = []
 
+    for hitobject in hitObjects:
+        parsedHitObjects.append(tuple(hitobject.split(",")))
+
+    return parsedHitObjects
 
 def initiateReplayAnalysis(replayName):
     replay = readReplay(replayName)
@@ -188,4 +216,13 @@ def initiateReplayAnalysis(replayName):
     replayData = decoders.decodeLZMA(compressedReplayData)
     frames = extractFrames(replayData)
 
-    return frames
+    del replayInfo["replay"]
+
+    return replayInfo, frames
+
+def initiateBeatmapAnalysis(beatmapName):
+    beatmap = readBeatmap(beatmapName)
+    hitObjects = extractHitObjects(beatmap["hitobjects"])
+
+    return beatmap, hitObjects
+
