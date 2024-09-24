@@ -227,7 +227,7 @@ def compileFrames(replayName, beatmapName):
    replay, replayFrames = initiateBeatmapAnalysis(replayName)
    return circles
 
-h = compileFrames("wifeline.osr","saygoodbye.osu")
+#h = compileFrames("wifeline.osr","saygoodbye.osu")
 
-print(h)
+#print(h)
 
