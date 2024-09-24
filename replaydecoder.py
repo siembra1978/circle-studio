@@ -187,11 +187,6 @@ def readBeatmap(beatmapName):
 def extractFrames(replayData):
     dataList = []
     frameList = []
-    cursor1 = 0
-    cursor2 = 0
-    tempList = []
-    tempBit = ''
-    tempBit2 = ''
 
     dataList = replayData.split(",")
 
@@ -225,4 +220,14 @@ def initiateBeatmapAnalysis(beatmapName):
     hitObjects = extractHitObjects(beatmap["hitobjects"])
 
     return beatmap, hitObjects
+
+def compileFrames(replayName, beatmapName):
+
+   map, circles = initiateBeatmapAnalysis(beatmapName)
+   replay, replayFrames = initiateBeatmapAnalysis(replayName)
+   return circles
+
+h = compileFrames("wifeline.osr","saygoodbye.osu")
+
+print(h)
 
