@@ -216,18 +216,33 @@ def initiateReplayAnalysis(replayName):
     return replayInfo, frames
 
 def initiateBeatmapAnalysis(beatmapName):
+    #print(beatmapName)
     beatmap = readBeatmap(beatmapName)
     hitObjects = extractHitObjects(beatmap["hitobjects"])
 
     return beatmap, hitObjects
 
 def compileFrames(replayName, beatmapName):
+   
+   frames = ()
+   indexedReplayFrames = {}
 
+   replay, replayFrames = initiateReplayAnalysis(replayName)
    map, circles = initiateBeatmapAnalysis(beatmapName)
-   replay, replayFrames = initiateBeatmapAnalysis(replayName)
-   return circles
 
-#h = compileFrames("wifeline.osr","saygoodbye.osu")
+   maxFrames = int(circles[-1][2])
+   offset = 0
 
-#print(h)
+   if h:
+       print("h")
+
+
+selectedReplay = "stdold.osr"
+selectedBeatmap = "saygoodbye.osu"
+
+h = compileFrames(selectedReplay, selectedBeatmap)
+
+for t in h:
+    print(t)
+    #time.sleep(.25)
 
