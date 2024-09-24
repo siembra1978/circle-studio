@@ -45,18 +45,16 @@ def main():
     WIDTH, HEIGHT = 1280, 720
     factorX, factorY = WIDTH/512, HEIGHT/384
 
-    selectedReplay = 'siembra.osr'
+    selectedReplay = 'wifeline.osr'
     selectedBeatmap = 'saygoodbye.osu'
-    replay, replayFrames = replaydecoder.initiateReplayAnalysis(selectedReplay)
-    beatmap, hitobjects = replaydecoder.initiateBeatmapAnalysis(selectedBeatmap)
+    replay, frames = replaydecoder.compileFrames(selectedReplay, selectedBeatmap)
 
-    frameIndex = 0
-    frameTotal = len(replayFrames) - 2
-    ms = 0
+    frameTotal = len(frames)
+    ms = 4892
 
     autoPlay = False
     speedMultiplier = 1
-    tickSpeed = 60
+    tickSpeed = 1000
 
     if "DT" in replay["mods"]:
         print("is dt")
@@ -73,24 +71,35 @@ def main():
     objectList = []
     cursor = Cursor(screen, factorX, factorY)
 
-    for object in hitobjects:
-        objectList.append(HitCircle(screen, int(object[0]), int(object[1]), int(object[3]), float(beatmap["ar"]), factorX, factorY))
+    x,y = 0,0
 
     while True:
         screen.fill("black")
+        
+        frame = frames[ms]
+        print(frame[0][1])
 
-        frameData = replayFrames[frameIndex]
-        #print(frameIndex, frameData)
-        x = frameData[1]
-        y = frameData[2]
+        if frame[0] is not None and frame[0][0] is not None and len(frame[0]) == 2:
+            x = frame[0][0][1]
+            y = frame[0][0][2]
+            #print(x,y)
+        elif frame[0] is not None and len(frame[0]) == 4:
+            x = frame[0][1]
+            y = frame[0][2]
+            #print(x,y)
+
+        if frame[0][1] is not None:
+            print(frame[0][1][0], frame[0][1][1])
 
         keys = pygame.key.get_pressed()
 
-        textSurface = font.render(f"Time (ms): {ms}| AutoPlay: {autoPlay} | Frame {frameIndex} out of {frameTotal} ", False, (255, 255, 255))
-        textSurface2 = font.render(f"Frame Data: {frameIndex, frameData}", False, (255, 255, 255))
+        textSurface = font.render(f"Time (ms): {ms}| AutoPlay: {autoPlay}", False, (255, 255, 255))
+        textSurface2 = font.render(f"Frame: {frame}", False, (255, 255, 255))
+        textSurface3 = font.render(f"Frame Data: {ms, frameTotal}", False, (255, 255, 255))
 
         screen.blit(textSurface, (0,0))
-        screen.blit(textSurface2, (0,HEIGHT-30))
+        screen.blit(textSurface2, (0,20))
+        screen.blit(textSurface3, (0,HEIGHT-30))
 
         cursor.update(x,y)
 
@@ -130,6 +139,6 @@ def main():
         
 
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(tickSpeed)
 
 main()

@@ -194,6 +194,7 @@ def extractFrames(replayData):
         frameList.append(tuple(item.split("|")))
 
     frameList = frameList[3:]
+    frameList = frameList[:-1]
 
     return frameList
 
@@ -224,25 +225,61 @@ def initiateBeatmapAnalysis(beatmapName):
 
 def compileFrames(replayName, beatmapName):
    
-   frames = ()
+   frames = []
    indexedReplayFrames = {}
+   indexedCircleFrames = {}
 
    replay, replayFrames = initiateReplayAnalysis(replayName)
    map, circles = initiateBeatmapAnalysis(beatmapName)
 
    maxFrames = int(circles[-1][2])
+   
    offset = 0
+   prevFrame = None
 
-   if h:
-       print("h")
+   for index, rFrame in enumerate(replayFrames):
+      if int(rFrame[0]) > 0:
+          offset += int(rFrame[0])
+          #print(index, offset, rFrame)
+          indexedReplayFrames[offset] = rFrame
+      else:
+          indexedReplayFrames[offset] = rFrame
 
+   for index, circle in enumerate(circles):
+      #print(index, circle[2], circle)
+      indexedCircleFrames[int(circle[2])] = circle
+      #time.sleep(.25)
 
-selectedReplay = "stdold.osr"
+   prevCursor = None
+
+   for i in range(0, maxFrames + 1):
+      frame = []
+      if i in indexedReplayFrames.keys() and i in indexedCircleFrames.keys():
+         #print(i, indexedReplayFrames[i], indexedCircleFrames[i], 'replay and circle')
+         frame.append((indexedReplayFrames[i],indexedCircleFrames[i]))
+         prevCursor = (indexedReplayFrames[i],indexedCircleFrames[i])
+      elif i in indexedReplayFrames.keys():
+         #print(i, indexedReplayFrames[i], 'replay')
+         frame.append((indexedReplayFrames[i],None))
+         prevCursor = (indexedReplayFrames[i])
+      elif i in indexedCircleFrames.keys():
+         #print(i, indexedCircleFrames[i], 'circle')
+         frame.append((None,indexedCircleFrames[i]))
+      else:
+          #print(i, 'nothing')
+          frame.append(prevCursor)
+      frames.append(frame)
+      print(i, frame)
+      #time.sleep(.002)
+   
+   return replay, frames
+
+selectedReplay = "wifeline.osr"
 selectedBeatmap = "saygoodbye.osu"
 
-h = compileFrames(selectedReplay, selectedBeatmap)
+#h = compileFrames(selectedReplay, selectedBeatmap)
 
-for t in h:
-    print(t)
-    #time.sleep(.25)
-
+'''
+for i, thing in enumerate(h):
+    print(i, thing)
+'''
