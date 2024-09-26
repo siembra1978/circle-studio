@@ -6,22 +6,26 @@ import time
 import replaydecoder
 
 class HitCircle:
-    def __init__(self, screen, x, y, offset, ar, factorX, factorY):
-        print("circle",x,y,ar)
+    def __init__(self, screen, x, y, ms, ar, factorX, factorY):
+        #print("circle",x,y,ar)
         self.screen = screen
         self.x = float(x) * factorX
         self.y = float(y) * factorY
-        self.offset = offset
-        self.ar = ar
+        self.createdMS = ms
+        self.currentMS = ms
+        self.ar = 1200 - (750*(ar - 5)/5)
+        print(self.ar)
         
-    def update(self):
-       print("updating circle")
-       self.draw()
+    def update(self, ms):
+       #print("updating circle")
+       self.currentMS = ms
+       if self.currentMS - self.createdMS < self.ar-1:
+           self.draw()
 
     def draw(self):
-        print("drawing circle")
+        #print("drawing circle")
         circlePos = pygame.Vector2(self.x, self.y)
-        pygame.draw.circle(self.screen,(105,105,105),circlePos,40)
+        pygame.draw.circle(self.screen,(105,105,105),circlePos,60)
 
 class Cursor:
     def __init__(self, screen, factorX, factorY):
@@ -50,7 +54,7 @@ def main():
     replay, frames = replaydecoder.compileFrames(selectedReplay, selectedBeatmap)
 
     frameTotal = len(frames)
-    ms = 4892
+    ms = 0
 
     autoPlay = False
     speedMultiplier = 1
@@ -59,7 +63,7 @@ def main():
     if "DT" in replay["mods"]:
         print("is dt")
         speedMultiplier = 2/3
-        tickSpeed = 60
+        tickSpeed = 1000
 
     pygame.init()
     pygame.font.init()
@@ -70,36 +74,56 @@ def main():
 
     objectList = []
     cursor = Cursor(screen, factorX, factorY)
+    newCircle = False
 
     x,y = 0,0
+    cx,cy = 0,0
 
     while True:
+        circle = False
+        cx,cy = 0,0
         screen.fill("black")
         
         frame = frames[ms]
-        print(frame[0][1])
+        #print(frame)
+        #print(len(frame[0]))
+        #print(frame[0][1][0])
+        #print(frame[0][1][1])
 
-        if frame[0] is not None and frame[0][0] is not None and len(frame[0]) == 2:
-            x = frame[0][0][1]
-            y = frame[0][0][2]
-            #print(x,y)
+        if frame[0] is not None and len(frame[0]) == 2:
+            #print("1")
+            if frame[0][0] is not None:
+                x = frame[0][0][1]
+                y = frame[0][0][2]
+            
+            if frame[0][1] is not None:
+                newCircle = True
+                cx,cy = frame[0][1][0],frame[0][1][1]
+                #print(frame[0][1][0],frame[0][1][1])
+
         elif frame[0] is not None and len(frame[0]) == 4:
+            #print("2")
             x = frame[0][1]
             y = frame[0][2]
             #print(x,y)
-
-        if frame[0][1] is not None:
-            print(frame[0][1][0], frame[0][1][1])
-
+            
         keys = pygame.key.get_pressed()
 
-        textSurface = font.render(f"Time (ms): {ms}| AutoPlay: {autoPlay}", False, (255, 255, 255))
+        textSurface = font.render(f"Resolution: {WIDTH} x {HEIGHT}| AutoPlay: {autoPlay}", False, (255, 255, 255))
         textSurface2 = font.render(f"Frame: {frame}", False, (255, 255, 255))
         textSurface3 = font.render(f"Frame Data: {ms, frameTotal}", False, (255, 255, 255))
 
         screen.blit(textSurface, (0,0))
         screen.blit(textSurface2, (0,20))
         screen.blit(textSurface3, (0,HEIGHT-30))
+
+        if cx != 0 and cy != 0:
+            #print("new circle")
+            currentCircle = HitCircle(screen,cx,cy,ms,9.3,factorX,factorY)
+            objectList.append(currentCircle)
+
+        for object in objectList:
+            object.update(ms)
 
         cursor.update(x,y)
 
@@ -115,7 +139,8 @@ def main():
                         if ms > 0:
                             ms-=1
                     if event.key == pygame.K_RIGHT:
-                        ms+=1
+                        if ms < frameTotal-1:
+                            ms+=1
                 if event.key == pygame.K_SPACE:
                     autoPlay = not autoPlay
             if event.type == pygame.VIDEORESIZE:
@@ -128,14 +153,18 @@ def main():
         keys = pygame.key.get_pressed()
         if not autoPlay:
             if keys[pygame.K_UP]:
-                ms+=1
+                if ms < frameTotal-1:
+                    ms+=1
             if keys[pygame.K_DOWN]:
                 if ms > 0:
                     ms-=1
 
         if autoPlay:
             #pygame.time.delay(1)
-            ms+=1
+            if ms < frameTotal-1:
+                ms+=1
+            elif ms == frameTotal-1:
+                autoPlay = not autoPlay
         
 
         pygame.display.update()

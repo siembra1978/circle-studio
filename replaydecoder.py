@@ -247,7 +247,7 @@ def compileFrames(replayName, beatmapName):
 
    for index, circle in enumerate(circles):
       #print(index, circle[2], circle)
-      indexedCircleFrames[int(circle[2])] = circle
+      indexedCircleFrames[int(circle[2]) - (1200 - (750*(9.3 - 5)/5))] = circle
       #time.sleep(.25)
 
    prevCursor = None
@@ -255,31 +255,15 @@ def compileFrames(replayName, beatmapName):
    for i in range(0, maxFrames + 1):
       frame = []
       if i in indexedReplayFrames.keys() and i in indexedCircleFrames.keys():
-         #print(i, indexedReplayFrames[i], indexedCircleFrames[i], 'replay and circle')
          frame.append((indexedReplayFrames[i],indexedCircleFrames[i]))
          prevCursor = (indexedReplayFrames[i],indexedCircleFrames[i])
       elif i in indexedReplayFrames.keys():
-         #print(i, indexedReplayFrames[i], 'replay')
          frame.append((indexedReplayFrames[i],None))
          prevCursor = (indexedReplayFrames[i])
       elif i in indexedCircleFrames.keys():
-         #print(i, indexedCircleFrames[i], 'circle')
          frame.append((None,indexedCircleFrames[i]))
       else:
-          #print(i, 'nothing')
           frame.append(prevCursor)
       frames.append(frame)
-      print(i, frame)
-      #time.sleep(.002)
    
    return replay, frames
-
-selectedReplay = "wifeline.osr"
-selectedBeatmap = "saygoodbye.osu"
-
-#h = compileFrames(selectedReplay, selectedBeatmap)
-
-'''
-for i, thing in enumerate(h):
-    print(i, thing)
-'''
