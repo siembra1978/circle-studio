@@ -6,15 +6,15 @@ import time
 import replaydecoder
 
 class HitCircle:
-    def __init__(self, screen, x, y, ms, ar, factorX, factorY):
+    def __init__(self, screen, x, y, ms, ar, factorX, factorY, canvasX, canvasY):
         #print("circle",x,y,ar)
         self.screen = screen
-        self.x = float(x) * factorX
-        self.y = float(y) * factorY
+        self.x = float(x) * factorX + canvasX
+        self.y = float(y) * factorY + canvasY
         self.createdMS = ms
         self.currentMS = ms
         self.ar = 1200 - (750*(ar - 5)/5)
-        print(self.ar)
+        #print(self.ar)
         
     def update(self, ms):
        #print("updating circle")
@@ -28,16 +28,18 @@ class HitCircle:
         pygame.draw.circle(self.screen,(105,105,105),circlePos,60)
 
 class Cursor:
-    def __init__(self, screen, factorX, factorY):
+    def __init__(self, screen, factorX, factorY, canvasX,canvasY):
         self.screen = screen
         self.x = 0
         self.y = 0
         self.factorX = factorX
         self.factorY = factorY
+        self.canvasX = canvasX
+        self.canvasY = canvasY
 
     def update(self, x, y):
-        self.x = float(x) * self.factorX
-        self.y = float(y) * self.factorY
+        self.x = float(x) * self.factorX + self.canvasX
+        self.y = float(y) * self.factorY + self.canvasY
         self.draw()
 
     def draw(self):
@@ -46,10 +48,19 @@ class Cursor:
 
 def main():
 
+    osuX, osuY = 512, 384
+    osuRatio = osuX/osuY
     WIDTH, HEIGHT = 1280, 720
-    factorX, factorY = WIDTH/512, HEIGHT/384
 
-    selectedReplay = 'wifeline.osr'
+    screenRatio = WIDTH/HEIGHT
+    canvasHeight = HEIGHT * .8
+    canvasWidth = canvasHeight * (4/3)
+    canvasX = (WIDTH-canvasWidth)/2
+    canvasY = (HEIGHT-canvasHeight)/2
+    factorX, factorY = canvasWidth/512, canvasHeight/384
+    BORDER = 50
+
+    selectedReplay = 'siembra.osr'
     selectedBeatmap = 'saygoodbye.osu'
     replay, frames = replaydecoder.compileFrames(selectedReplay, selectedBeatmap)
 
@@ -73,8 +84,10 @@ def main():
     clock = pygame.time.Clock()
 
     objectList = []
-    cursor = Cursor(screen, factorX, factorY)
+    cursor = Cursor(screen, factorX, factorY, canvasX, canvasY)
     newCircle = False
+    
+    center = pygame.Vector2(WIDTH/2, HEIGHT/2)
 
     x,y = 0,0
     cx,cy = 0,0
@@ -83,6 +96,9 @@ def main():
         circle = False
         cx,cy = 0,0
         screen.fill("black")
+
+        canvas = pygame.Rect(canvasX, canvasY, canvasWidth, canvasHeight)
+        pygame.draw.rect(screen, (0,0,255), canvas, 10)
         
         frame = frames[ms]
         #print(frame)
@@ -105,7 +121,7 @@ def main():
             #print("2")
             x = frame[0][1]
             y = frame[0][2]
-            #print(x,y)
+            print(x,y)
             
         keys = pygame.key.get_pressed()
 
@@ -119,7 +135,7 @@ def main():
 
         if cx != 0 and cy != 0:
             #print("new circle")
-            currentCircle = HitCircle(screen,cx,cy,ms,9.3,factorX,factorY)
+            currentCircle = HitCircle(screen,cx,cy,ms,10,factorX,factorY,canvasX,canvasY)
             objectList.append(currentCircle)
 
         for object in objectList:
@@ -146,7 +162,12 @@ def main():
             if event.type == pygame.VIDEORESIZE:
                 WIDTH, HEIGHT = event.w, event.h
                 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-                factorX, factorY = WIDTH/512, HEIGHT/384
+                canvasHeight = HEIGHT * .8
+                canvasWidth = canvasHeight * (4/3)
+                canvasX = (WIDTH-canvasWidth)/2
+                canvasY = (HEIGHT-canvasHeight)/2
+                #factorX, factorY = WIDTH/512, HEIGHT/384
+                factorX, factorY = canvasWidth/512, canvasHeight/384
                 cursor.factorX = factorX
                 cursor.factorY = factorY
 
