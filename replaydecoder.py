@@ -247,7 +247,8 @@ def compileFrames(replayName, beatmapName):
 
    for index, circle in enumerate(circles):
       #print(index, circle[2], circle)
-      indexedCircleFrames[int(circle[2]) - (1200 - (750*(10 - 5)/5))] = circle
+      #indexedCircleFrames[int(circle[2]) - (1200 - (750*(9.3 - 5)/5))] = circle
+      indexedCircleFrames[int(circle[2])] = circle
       #time.sleep(.25)
 
    prevCursor = None

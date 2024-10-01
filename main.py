@@ -11,21 +11,33 @@ class HitCircle:
         self.screen = screen
         self.x = float(x) * factorX + canvasX
         self.y = float(y) * factorY + canvasY
+
         self.createdMS = ms
-        self.currentMS = ms
+        self.currentMS = 0
         self.ar = 1200 - (750*(ar - 5)/5)
+
+        self.factorX = factorX
+        self.factorY = factorY
+        self.canvasX = canvasX
+        self.canvasY = canvasY
+
         #print(self.ar)
         
     def update(self, ms):
        #print("updating circle")
        self.currentMS = ms
-       if self.currentMS - self.createdMS < self.ar-1:
-           self.draw()
+       diff = self.createdMS - self.currentMS
+       if diff < self.ar and self.createdMS >= self.currentMS:
+            self.draw()
 
     def draw(self):
-        #print("drawing circle")
+        #print("h")
+        diff = self.createdMS - self.currentMS
+        R,G,B = 255*((self.ar-diff)/self.ar),255*((self.ar-diff)/self.ar),255*((self.ar-diff)/self.ar)
         circlePos = pygame.Vector2(self.x, self.y)
-        pygame.draw.circle(self.screen,(105,105,105),circlePos,60)
+        arSize = 250-(((self.ar-diff)/self.ar)*250)
+        pygame.draw.circle(self.screen,(255,255,255),circlePos, arSize, 5)
+        pygame.draw.circle(self.screen,(R,G,B),circlePos,60)
 
 class Cursor:
     def __init__(self, screen, factorX, factorY, canvasX,canvasY):
@@ -49,18 +61,15 @@ class Cursor:
 def main():
 
     osuX, osuY = 512, 384
-    osuRatio = osuX/osuY
-    WIDTH, HEIGHT = 1280, 720
+    WIDTH, HEIGHT = 1920, 1009
 
-    screenRatio = WIDTH/HEIGHT
     canvasHeight = HEIGHT * .8
     canvasWidth = canvasHeight * (4/3)
     canvasX = (WIDTH-canvasWidth)/2
     canvasY = (HEIGHT-canvasHeight)/2
     factorX, factorY = canvasWidth/512, canvasHeight/384
-    BORDER = 50
 
-    selectedReplay = 'siembra.osr'
+    selectedReplay = 'wifeline.osr'
     selectedBeatmap = 'saygoodbye.osu'
     replay, frames = replaydecoder.compileFrames(selectedReplay, selectedBeatmap)
 
@@ -85,9 +94,16 @@ def main():
 
     objectList = []
     cursor = Cursor(screen, factorX, factorY, canvasX, canvasY)
-    newCircle = False
+
+    for i, frame in enumerate(frames):
+        if frame[0] is not None and len(frame[0]) == 2:
+            if frame[0][1] is not None:
+                cx,cy = frame[0][1][0],frame[0][1][1]
+                if cx != 0 and cy != 0:
+                    circle = HitCircle(screen,cx,cy,i,10,factorX,factorY,canvasX,canvasY)
+                    objectList.append(circle)
     
-    center = pygame.Vector2(WIDTH/2, HEIGHT/2)
+    #center = pygame.Vector2(WIDTH/2, HEIGHT/2)
 
     x,y = 0,0
     cx,cy = 0,0
@@ -112,16 +128,14 @@ def main():
                 x = frame[0][0][1]
                 y = frame[0][0][2]
             
-            if frame[0][1] is not None:
-                newCircle = True
-                cx,cy = frame[0][1][0],frame[0][1][1]
-                #print(frame[0][1][0],frame[0][1][1])
+            #if frame[0][1] is not None:
+                #cx,cy = frame[0][1][0],frame[0][1][1]
 
         elif frame[0] is not None and len(frame[0]) == 4:
             #print("2")
             x = frame[0][1]
             y = frame[0][2]
-            print(x,y)
+            #print(x,y)
             
         keys = pygame.key.get_pressed()
 
@@ -133,14 +147,16 @@ def main():
         screen.blit(textSurface2, (0,20))
         screen.blit(textSurface3, (0,HEIGHT-30))
 
+        '''
         if cx != 0 and cy != 0:
             #print("new circle")
             currentCircle = HitCircle(screen,cx,cy,ms,10,factorX,factorY,canvasX,canvasY)
             objectList.append(currentCircle)
+        '''
 
         for object in objectList:
             object.update(ms)
-
+        
         cursor.update(x,y)
 
         #pygame.gfxdraw.aacircle(screen, x, y, 15, (255,0,0))
@@ -162,12 +178,12 @@ def main():
             if event.type == pygame.VIDEORESIZE:
                 WIDTH, HEIGHT = event.w, event.h
                 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
-                canvasHeight = HEIGHT * .8
-                canvasWidth = canvasHeight * (4/3)
-                canvasX = (WIDTH-canvasWidth)/2
-                canvasY = (HEIGHT-canvasHeight)/2
-                #factorX, factorY = WIDTH/512, HEIGHT/384
-                factorX, factorY = canvasWidth/512, canvasHeight/384
+                for object in objectList:
+                    canvasHeight = HEIGHT * .8
+                    canvasWidth = canvasHeight * (4/3)
+                    canvasX = (WIDTH-canvasWidth)/2
+                    canvasY = (HEIGHT-canvasHeight)/2
+                    factorX, factorY = canvasWidth/512, canvasHeight/384
                 cursor.factorX = factorX
                 cursor.factorY = factorY
 
