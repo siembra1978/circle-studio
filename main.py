@@ -61,7 +61,7 @@ class Cursor:
 def main():
 
     osuX, osuY = 512, 384
-    WIDTH, HEIGHT = 1920, 1009
+    WIDTH, HEIGHT = 1280, 720
 
     canvasHeight = HEIGHT * .8
     canvasWidth = canvasHeight * (4/3)
