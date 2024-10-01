@@ -144,6 +144,8 @@ def readReplay(replayName):
     replayInfo["id"] = struct.unpack_from("<Q", replayData, offset)[0]
     offset += 8
     
+    replay.close()
+
     return replayInfo
 
 def readBeatmap(beatmapName):
