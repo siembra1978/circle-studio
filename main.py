@@ -35,7 +35,7 @@ class HitCircle:
         diff = self.createdMS - self.currentMS
         R,G,B = 255*((self.ar-diff)/self.ar),255*((self.ar-diff)/self.ar),255*((self.ar-diff)/self.ar)
         circlePos = pygame.Vector2(self.x, self.y)
-        arSize = 250-(((self.ar-diff)/self.ar)*250)
+        arSize = 300-(((self.ar-diff)/self.ar)*300)
         pygame.draw.circle(self.screen,(255,255,255),circlePos, arSize, 5)
         pygame.draw.circle(self.screen,(R,G,B),circlePos,60)
 
@@ -114,7 +114,7 @@ def main():
         screen.fill("black")
 
         canvas = pygame.Rect(canvasX, canvasY, canvasWidth, canvasHeight)
-        pygame.draw.rect(screen, (0,0,255), canvas, 10)
+        pygame.draw.rect(screen, (105,105,105), canvas, 5)
         
         frame = frames[ms]
         #print(frame)
