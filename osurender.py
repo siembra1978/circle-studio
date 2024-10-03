@@ -1,7 +1,4 @@
 import pygame
-from pygame import gfxdraw
-import sys
-import math
 import time
 import osureader
 
