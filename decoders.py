@@ -1,8 +1,6 @@
 import struct
 import lzma
 
-decompressor = lzma.LZMADecompressor()
-
 def decodeULEB(data, off):
     result = 0
     shift = 0
@@ -29,5 +27,6 @@ def readString(data, off):
         return "", off
     
 def decodeLZMA(data):
+    decompressor = lzma.LZMADecompressor()
     decodedData = decompressor.decompress(data).decode('utf-8')
     return decodedData
