@@ -1,6 +1,7 @@
 import struct
 import lzma
 
+# Function to decode ULEB128 values into a readable format
 def decodeULEB(data, off):
     result = 0
     shift = 0
@@ -14,6 +15,7 @@ def decodeULEB(data, off):
         shift += 7
     return result, size
 
+# Function to read the strings from the byte arrays provided by the .osr file (thnaks for making it a pain peppy)
 def readString(data, off):
     marker, = struct.unpack_from("<B", data, off)
     off += 1
@@ -25,7 +27,8 @@ def readString(data, off):
         return string, off
     else:
         return "", off
-    
+
+# Function to decode LZMA values
 def decodeLZMA(data):
     decompressor = lzma.LZMADecompressor()
     decodedData = decompressor.decompress(data).decode('utf-8')

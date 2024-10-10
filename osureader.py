@@ -2,9 +2,11 @@ import struct
 import decoders
 import time
 
+# Initializes list containing bytes and the osu! gamemodes
 byteList = []
 modes = ['standard', 'taiko', 'ctb', 'mania']
 
+# Sets up a dictionary structure for replay files
 replayInfo = {
     "mode": "",
     "version": "",
@@ -29,6 +31,7 @@ replayInfo = {
     "mod+": ""
 }
 
+# Sets up a dictionary structure for beatmap files
 beatmapInfo = {
     "title":"",
     "artist":"",
@@ -40,6 +43,7 @@ beatmapInfo = {
     "hitobjects":"",
 }
 
+# Sets up bitwise method for mod determination
 mods = {
     "1073741824": "MR",
     "536870912": "SV2",
@@ -76,6 +80,7 @@ mods = {
     "0": "NM"
 }
 
+# Sets up bitwise method for input determination
 inputs = {
     "1":"M1",
     "2":"M2",
@@ -84,6 +89,7 @@ inputs = {
     "16":"Smoke"
 }
 
+# Function that determines the mods used in a bitwise manner and returns
 def whatMods(modId):
     result = ''
     for key in mods.keys():
@@ -92,6 +98,7 @@ def whatMods(modId):
             result = result + mods.get(key)
     return result
 
+# Function that determines the inputs of a frame in a bitwise manner and returns
 def whatInputs(inputId):
     result = ''
     for key in inputs.keys():
@@ -100,6 +107,7 @@ def whatInputs(inputId):
             result = result + inputs.get(key)
     return result
 
+# Reads a byte-array structured .osr file using struct module and fills in the information in the replayInfo dictionary
 def readReplay(replayName):
 
     replay = open(replayName, "rb")
@@ -111,9 +119,12 @@ def readReplay(replayName):
     offset += 1
     replayInfo["version"] = struct.unpack_from("<I", replayData, offset)[0]
     offset += 4
+
+    # Special parts of the .osr structure that need to be decoded using decoders.py to be read
     replayInfo["bmhash"], offset = decoders.readString(replayData, offset)
     replayInfo["player"], offset = decoders.readString(replayData, offset)
     replayInfo["replayhash"], offset = decoders.readString(replayData, offset)
+
     replayInfo["perfect"] = struct.unpack_from("<H", replayData, offset)[0]
     offset += 2
     replayInfo["meh"] = struct.unpack_from("<H", replayData, offset)[0]
@@ -134,8 +145,11 @@ def readReplay(replayName):
     offset += 1
     replayInfo["mods"] = whatMods(struct.unpack_from("<I", replayData, offset)[0])
     offset += 4
+
+    # Special parts of the .osr structure that need to be decoded using decoders.py to be read
     replayInfo["lifebar"], offset = decoders.readString(replayData, offset)
     replayInfo["timestamp"] = struct.unpack_from("<L", replayData, offset)[0]
+
     offset += 8
     replayInfo["length"] = struct.unpack_from("<I", replayData, offset)[0]
     offset += 4
@@ -144,17 +158,22 @@ def readReplay(replayName):
     replayInfo["id"] = struct.unpack_from("<Q", replayData, offset)[0]
     offset += 8
     
+    # Closes replay file to prevent memory leaks
     replay.close()
 
     return replayInfo
 
+# Similar to readReplay, but for beatmaps; significantly more straightforwards as it is essentially plain text
 def readBeatmap(beatmapName):
 
+    # Opens .osu file
     beatmap = open(beatmapName, "r")
 
+    # Initializes hitObjects list and the index to determine where the HitObjects definitions begin
     hitObjects = []
     separatorIndex = None
 
+    # Reads beatmap for important information and puts it into the beatmapInfo dictionary
     for index, line in enumerate(beatmap):
 
         line = line.strip()
@@ -185,7 +204,7 @@ def readBeatmap(beatmapName):
 
     return beatmapInfo
 
-
+# Puts together the frames from the replay
 def extractFrames(replayData):
     dataList = []
     frameList = []
@@ -200,6 +219,7 @@ def extractFrames(replayData):
 
     return frameList
 
+# Puts together the hitobjects and their timing from the beatmap
 def extractHitObjects(hitObjects):
     parsedHitObjects = []
 
@@ -208,6 +228,7 @@ def extractHitObjects(hitObjects):
 
     return parsedHitObjects
 
+# Initializes the reading of replays, decoding necessary LZMA data
 def initiateReplayAnalysis(replayName):
     replay = readReplay(replayName)
     compressedReplayData = replay["replay"]
@@ -218,6 +239,7 @@ def initiateReplayAnalysis(replayName):
 
     return replayInfo, frames
 
+# Initializes the reading of beatmaps
 def initiateBeatmapAnalysis(beatmapName):
     #print(beatmapName)
     beatmap = readBeatmap(beatmapName)
@@ -225,6 +247,7 @@ def initiateBeatmapAnalysis(beatmapName):
 
     return beatmap, hitObjects
 
+# Compiles together the final frames for use, aligning the timing of hitobjects and replay input frames to combine them and make one full set of frames
 def compileFrames(replayName, beatmapName):
    
    frames = []
