@@ -214,7 +214,8 @@ def extractFrames(replayData):
     for item in dataList:
         frameList.append(tuple(item.split("|")))
 
-    frameList = frameList[3:]
+    #print(frameList)
+    frameList = frameList[4:]
     frameList = frameList[:-1]
 
     return frameList
@@ -261,8 +262,10 @@ def compileFrames(replayName, beatmapName):
    
    offset = 0
    prevFrame = None
-
+   offset-=250 
    for index, rFrame in enumerate(replayFrames):
+      if index < 500:
+        print(index, offset, rFrame)
       if int(rFrame[0]) > 0:
           offset += int(rFrame[0])
           #print(index, offset, rFrame)
